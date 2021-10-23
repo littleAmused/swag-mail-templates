@@ -1,0 +1,29 @@
+<div style="font-family:arial; font-size:12px;"><br/>
+  <p>
+    {% if order.orderCustomer.salutation %}{{ order.orderCustomer.salutation.translated.letterName ~ ' ' }}{% endif %}{{ order.orderCustomer.firstName }} {{ order.orderCustomer.lastName }},<br/>
+    <br/>
+    der Lieferstatus für Ihre Bestellung bei {{ salesChannel.translated.name }} (Number: {{ order.orderNumber }}) vom {{ order.orderDateTime|format_datetime('medium', 'short', locale='de-DE') }} hat sich geändert.<br/>
+    <strong>Die Bestellung hat jetzt den Lieferstatus: {{ order.deliveries.first.stateMachineState.translated.name }}.</strong><br/>
+    <br/>
+
+    {# DHL Tracking -- START #}
+    {% for delivery in order.deliveries %}
+      {% set myOrderTrackingCodes = delivery.getTrackingCodes() %}
+      {% if myOrderTrackingCodes is iterable %}
+        Ihre Sendung haben wir soeben versandt. Den aktuellen Status der Lieferung können Sie hier nachverfolgen:&nbsp;
+
+        {% for theOrderTrackingCode in myOrderTrackingCodes %}
+          <a href="https://www.dhl.de/de/privatkunden/pakete-empfangen/verfolgen.html?piececode={{ theOrderTrackingCode }}">{{ theOrderTrackingCode }}</a>
+        {% endfor %}
+        
+        <br/>
+      {% endif %}
+    {% endfor %}
+    {# DHL Tracking -- ENDE #}
+
+    <br/>
+    Den aktuellen Status Ihrer Bestellung können Sie auch jederzeit auf unserer Webseite im  Bereich "Mein Konto" - "Meine Bestellungen" abrufen: {{ rawUrl('frontend.account.order.single.page', { 'deepLinkCode': order.deepLinkCode }, salesChannel.domains|first.url) }}<br/>
+    </br>
+    Sollten Sie allerdings den Kauf ohne Registrierung, also ohne Anlage eines Kundenkontos, gewählt haben, steht Ihnen diese Möglichkeit nicht zur Verfügung.
+  </p>
+</div>
